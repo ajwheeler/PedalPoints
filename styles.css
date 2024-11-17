@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.map-container {
+    border: 1px solid #ccc;
+    height: 400px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.points-display {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+
+#countdown {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.station {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.bonus {
+    color: green;
+}
+
+.penalty {
+    color: red;
+}
+
+/* Custom map styles if needed */
+.custom-map {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    position: relative;
+}
+
+.station-marker {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: red;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
