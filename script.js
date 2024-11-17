@@ -84,7 +84,16 @@ function refreshZones(userPosition) {
             [position.lat, position.lng]
         );
         const points = choosePointValues(distance);
-        const marker = L.marker([position.lat, position.lng])
+
+        // Create a custom icon with points displayed
+        const icon = L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background: #078152; padding: 1px;">${points}</div>`,
+            iconSize: [40, 20],
+            iconAnchor: [20, 10]
+        });
+
+        const marker = L.marker([position.lat, position.lng], { icon: icon })
             .bindPopup(`Check-in point: ${points} points`)
             .addTo(map);
         checkInZones.push({ marker, points });
