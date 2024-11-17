@@ -13,18 +13,13 @@ body {
     overflow: hidden;
 }
 
-.points-display {
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    margin: 20px 0;
-}
+#info-header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
 
-#countdown {
-    font-size: 24px;
+    font-size: 14px;
     font-weight: bold;
-    text-align: center;
-    margin: 20px 0;
 }
 
 .station {

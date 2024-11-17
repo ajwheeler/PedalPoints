@@ -1,17 +1,24 @@
-// Point management ------------------------------------------------------------
 let points = 0;
-function addUserPoints(change) {
-    points += change;
-    document.getElementById('points').textContent = points;
-}
-
-// Zone management --------------------------------------------------------------
 let map;
 let userMarker;
 let checkInZones = [];
 const MILES_TO_METERS = 1609.34;
 const ZONE_RADIUS = 1.5 * MILES_TO_METERS; // 3 miles in meters
 const N_ZONES = 100;
+
+const userMarkerOptions = {
+    radius: 8,
+    fillColor: "#ff7800",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+function addUserPoints(change) {
+    points += change;
+    document.getElementById('points').textContent = points;
+}
 
 // Generate N random points within a circle, keeping minimum distance between them
 function generateRandomPoints(center, radius, n, minDistance = 200) { // minDistance in meters
@@ -122,7 +129,7 @@ function updateUserLocation(position) {
     if (userMarker) {
         userMarker.setLatLng([lat, lng]);
     } else {
-        userMarker = L.marker([lat, lng]).addTo(map);
+        userMarker = L.circleMarker([lat, lng], userMarkerOptions).addTo(map);
 
         if (!map.getBounds().contains(userMarker.getLatLng())) {
             map.setView([lat, lng], 15);
