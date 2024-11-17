@@ -1,25 +1,28 @@
 body {
     font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .map-container {
     border: 1px solid #ccc;
-    height: 400px;
-    margin: 20px 0;
-    position: relative;
-    overflow: hidden;
+    flex: 1;
+    margin: 20px;
+    min-height: 0;
 }
 
 #info-header {
     display: flex;
     justify-content: space-around;
     align-items: center;
-
     font-size: 14px;
     font-weight: bold;
+    margin: 10px;
+    margin-bottom: 0;
 }
 
 .station {
@@ -53,4 +56,10 @@ body {
     border-radius: 50%;
     transform: translate(-50%, -50%);
     cursor: pointer;
+}
+
+.custom-marker {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
 }

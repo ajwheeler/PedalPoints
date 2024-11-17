@@ -1,10 +1,11 @@
-let points = 0;
-let map;
-let userMarker;
-let checkInZones = [];
 const MILES_TO_METERS = 1609.34;
 const ZONE_RADIUS = 1.5 * MILES_TO_METERS; // 3 miles in meters
 const N_ZONES = 100;
+
+let userPoints = 0;
+let map;
+let userMarker;
+let checkInZones = [];
 
 const userMarkerOptions = {
     radius: 8,
@@ -16,8 +17,8 @@ const userMarkerOptions = {
 };
 
 function addUserPoints(change) {
-    points += change;
-    document.getElementById('points').textContent = points;
+    userPoints += change;
+    document.getElementById('points').textContent = userPoints;
 }
 
 // Generate N random points within a circle, keeping minimum distance between them
