@@ -1,6 +1,7 @@
 const MILES_TO_METERS = 1609.34;
-const ZONE_RADIUS = 3 * MILES_TO_METERS; // 3 miles in meters
+const MAX_ZONE_DISTANCE = 3 * MILES_TO_METERS; // 3 miles in meters
 const N_ZONES = 1000;
+const ZONE_SIZE = 30; // how close counts as "at" a zone?
 
 let userPoints = 0;
 let map;
@@ -105,7 +106,7 @@ function refreshZones(userPosition) {
 
         const newLocations = generateRandomPoints(
             { lat: userPosition.coords.latitude, lng: userPosition.coords.longitude },
-            ZONE_RADIUS, N_ZONES);
+            MAX_ZONE_DISTANCE, N_ZONES);
 
         // Generate new points
         for (let i = 0; i < N_ZONES; i++) {
@@ -123,6 +124,15 @@ function refreshZones(userPosition) {
                 iconSize: [30, 25],
                 iconAnchor: [15, 12]
             });
+
+            // Add a circle to show the check-in zone
+            const circle = L.circle([position.lat, position.lng], {
+                radius: ZONE_SIZE,
+                color: '#ff1493',
+                fillColor: '#ff69b4',
+                fillOpacity: 0.2,
+                weight: 1
+            }).addTo(map);
 
             const marker = L.marker([position.lat, position.lng], { icon: icon })
                 .bindPopup(`Check-in point: ${points} points`)
