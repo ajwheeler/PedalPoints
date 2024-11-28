@@ -1,6 +1,6 @@
 const MILES_TO_METERS = 1609.34;
 const ZONE_RADIUS = 1.5 * MILES_TO_METERS; // 3 miles in meters
-const N_ZONES = 100;
+const N_ZONES = 300;
 
 let userPoints = 0;
 let map;
@@ -119,9 +119,9 @@ function refreshZones(userPosition) {
             // Create a custom icon with points displayed
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="background: #078152; padding: 1px;">${points}</div>`,
-                iconSize: [40, 20],
-                iconAnchor: [20, 10]
+                html: `<div style="background: #ff69b4; padding: 3px; border-radius: 10px; border: 2px solid #ff1493; color: white; font-weight: bold; text-align: center; min-width: 20px;">${points}</div>`,
+                iconSize: [30, 25],
+                iconAnchor: [15, 12]
             });
 
             const marker = L.marker([position.lat, position.lng], { icon: icon })
