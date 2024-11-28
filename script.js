@@ -1,6 +1,6 @@
 const MILES_TO_METERS = 1609.34;
-const ZONE_RADIUS = 1.5 * MILES_TO_METERS; // 3 miles in meters
-const N_ZONES = 300;
+const ZONE_RADIUS = 3 * MILES_TO_METERS; // 3 miles in meters
+const N_ZONES = 1000;
 
 let userPoints = 0;
 let map;
