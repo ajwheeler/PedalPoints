@@ -2,6 +2,7 @@ const MILES_TO_METERS = 1609.34;
 const MAX_ZONE_DISTANCE = 1 * MILES_TO_METERS; // 3 miles in meters
 const N_ZONES = 300;
 const ZONE_SIZE = 30; // how close counts as "at" a zone?
+const STORAGE_KEY = 'PedalPointsGameState';
 
 const ZoneStatus = {
     NORMAL: 'normal',
@@ -14,11 +15,18 @@ const ZoneStatus = {
         nearby: {
             background: '#32CD32',
             border: '#228B22'
+        },
+        checkedIn: {
+            background: '#0000FF',
+            border: '#00008B'
         }
     }
 };
 
-let userPoints = 0;
+let gameState = {
+    points: 0,
+};
+
 let map;
 let userMarker;
 let checkInZones = [];
@@ -58,8 +66,21 @@ const userMarkerOptions = {
 };
 
 function addUserPoints(change) {
-    userPoints += change;
-    document.getElementById('points').textContent = userPoints;
+    gameState.points += change;
+    document.getElementById('points').textContent = gameState.points;
+    saveGameState();
+}
+
+function saveGameState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+}
+
+function loadGameState() {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (savedState) {
+        gameState = JSON.parse(savedState);
+        document.getElementById('points').textContent = gameState.points;
+    }
 }
 
 // Generate N random points within a circle, keeping minimum distance between them
@@ -196,6 +217,7 @@ function createZone(position, points) {
 }
 
 function initMap() {
+    loadGameState();
     // Initialize map centered on NYC
     map = L.map('map').setView([40.7128, -74.0060], 13);
 
@@ -257,7 +279,16 @@ function handleLocationError(error) {
 }
 
 // Initialize everything when the page loads
-document.addEventListener('DOMContentLoaded', initMap);
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+
+    // Add check-in button listener
+    document.getElementById('checkInButton').addEventListener('click', () => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(checkIn, handleLocationError);
+        }
+    });
+});
 
 function simulateMovement() {
     if (checkInZones.length === 0) return;
@@ -301,17 +332,11 @@ function checkIn(position) {
         const pointLatLng = point.marker.getLatLng();
         const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
 
-        if (distance <= 50) { // Within 50 meters
+        if (distance <= ZONE_SIZE) {
             addUserPoints(point.points);
             alert(`Checked in! +${point.points} points`);
 
-            // Remove this check-in point
-            point.remove();
-            checkInZones.splice(i, 1);
-
-            // Generate a new point to replace it
-            refreshZones(position);
-            break;
+            point.setStatus('checkedIn');
         }
     }
 } 

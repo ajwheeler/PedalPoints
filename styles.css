@@ -63,3 +63,35 @@ body {
     font-weight: bold;
     font-size: 12px;
 }
+
+.check-in-button {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #ff69b4;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.check-in-button:hover {
+    background-color: #ff1493;
+    transform: translateX(-50%) scale(1.05);
+}
+
+.check-in-button:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+.button-emoji {
+    display: inline-block;
+    margin: 0 5px;
+}
