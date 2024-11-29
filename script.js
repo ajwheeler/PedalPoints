@@ -9,16 +9,16 @@ const ZoneStatus = {
     NEARBY: 'nearby',
     COLORS: {
         normal: {
-            background: '#ff69b4',
-            border: '#ff1493'
-        },
-        nearby: {
-            background: '#32CD32',
+            background: '#1db77e',
             border: '#228B22'
         },
+        nearby: {
+            background: '#3774be',
+            border: '#1b62b8'
+        },
         checkedIn: {
-            background: '#0000FF',
-            border: '#00008B'
+            background: '#006400',
+            border: '#004200'
         }
     }
 };
