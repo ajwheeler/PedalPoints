@@ -17,7 +17,7 @@ const ZoneStatus = {
             border: '#1b62b8'
         },
         checkedIn: {
-            background: '#006400',
+            background: '#6a6a6a',
             border: '#004200'
         }
     }
@@ -184,11 +184,13 @@ function createZone(position, points) {
     const marker = L.marker([position.lat, position.lng], { icon: icon })
         .addTo(map);
 
-    return {
+    // Add checkedIn property to track check-in status
+    const zone = {
         marker,
         circle,
         points,
         status: ZoneStatus.NORMAL,
+        checkedIn: false,
         setStatus(newStatus) {
             if (!(newStatus in ZoneStatus.COLORS)) return;
 
@@ -214,6 +216,8 @@ function createZone(position, points) {
             this.circle.remove();
         }
     };
+
+    return zone;
 }
 
 function initMap() {
@@ -337,7 +341,6 @@ function simulateMovement() {
 
 function checkIn(position) {
     console.log("Checking in");
-    // Find if user is near any check-in points
     const userLatLng = [position.coords.latitude, position.coords.longitude];
 
     for (let i = 0; i < checkInZones.length; i++) {
@@ -345,8 +348,9 @@ function checkIn(position) {
         const pointLatLng = point.marker.getLatLng();
         const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
 
-        if (distance <= ZONE_SIZE) {
+        if (distance <= ZONE_SIZE && !point.checkedIn) {
             console.log("within range for a zone!")
+            point.checkedIn = true;
             addUserPoints(point.points);
             alert(`Checked in! +${point.points} points`);
 
