@@ -12,17 +12,20 @@ body {
     border: 1px solid #ccc;
     flex: 1;
     margin: 20px;
+    margin-top: 10px;
     min-height: 0;
 }
 
 #info-header {
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-start;
     align-items: center;
-    font-size: 14px;
-    font-weight: bold;
-    margin: 10px;
+    margin: 10px 20px;
     margin-bottom: 0;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    flex-wrap: nowrap;
 }
 
 .station {
@@ -100,4 +103,55 @@ body {
 .bike-marker {
     font-size: 34px;
     text-align: center;
+}
+
+/* Common display styles for all counters */
+.points-display,
+.multiplier-display,
+.stations-display {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.points-display {
+    background-color: #17915f;
+}
+
+.multiplier-display {
+    background-color: #1db77e;
+}
+
+.stations-display {
+    background-color: #e0e0e0;
+    color: #666;
+}
+
+/* Common counter value styles */
+#points,
+#multiplier,
+#stations {
+    background-color: white;
+    padding: 1px 6px;
+    border-radius: 12px;
+    margin-left: 4px;
+}
+
+/* Specific counter colors */
+#points {
+    color: #1db77e;
+}
+
+#multiplier {
+    color: #17915f;
+}
+
+#stations {
+    color: #666;
 }
