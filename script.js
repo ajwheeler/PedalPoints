@@ -17,7 +17,7 @@ const ZoneStatus = {
             border: '#1b62b8'
         },
         checkedIn: {
-            background: '#6a6a6a',
+            background: '#006400',
             border: '#004200'
         }
     }
@@ -258,7 +258,6 @@ function updateUserLocation(position) {
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
 
-    // Cache the position
     cachedUserPosition = position;
 
     if (userMarker) {
@@ -273,11 +272,12 @@ function updateUserLocation(position) {
 
     // Update zone statuses
     const userLatLng = [lat, lng];
+
     checkInZones.forEach(zone => {
         const pointLatLng = zone.marker.getLatLng();
         const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
-
-        zone.setStatus(distance <= ZONE_SIZE ? ZoneStatus.NEARBY : ZoneStatus.NORMAL);
+        const isNearby = distance <= ZONE_SIZE;
+        zone.setStatus(isNearby ? ZoneStatus.NEARBY : ZoneStatus.NORMAL);
     });
 
     console.log("User location updated");
