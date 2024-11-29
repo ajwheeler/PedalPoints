@@ -81,8 +81,6 @@ function addUserPoints(change) {
     saveGameState();
 }
 
-
-
 // Generate N random points within a circle, keeping minimum distance between them
 function generateRandomZones(center, radius, n, minDistance = 100) { // minDistance in meters
     const seed = getCurrentTimeBlock();
@@ -250,9 +248,14 @@ function initMap() {
     console.log("Map initialized");
 }
 
+let cachedUserPosition = null;
+
 function updateUserLocation(position) {
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
+
+    // Cache the position
+    cachedUserPosition = position;
 
     if (userMarker) {
         userMarker.setLatLng([lat, lng]);
@@ -284,15 +287,14 @@ function handleLocationError(error) {
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
 
-    // Add check-in button listener
     const checkInButton = document.getElementById('checkInButton');
     if (checkInButton) {
         checkInButton.addEventListener('click', () => {
             console.log('Check-in button clicked');
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(checkIn, handleLocationError);
+            if (cachedUserPosition) {
+                checkIn(cachedUserPosition);
             } else {
-                alert("Geolocation is not supported by this browser.");
+                alert("Please wait for your location to be determined.");
             }
         });
     } else {
