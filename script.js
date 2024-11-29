@@ -1,6 +1,6 @@
 const MILES_TO_METERS = 1609.34;
 const MAX_ZONE_DISTANCE = 1 * MILES_TO_METERS; // 3 miles in meters
-const N_ZONES = 300;
+const N_ZONES = 200;
 const ZONE_SIZE = 30; // how close counts as "at" a zone?
 const STORAGE_KEY = 'PedalPointsGameState';
 
@@ -84,12 +84,12 @@ function loadGameState() {
 }
 
 // Generate N random points within a circle, keeping minimum distance between them
-function generateRandomPoints(center, radius, n, minDistance = 200) { // minDistance in meters
+function generateRandomPoints(center, radius, n, minDistance = 100) { // minDistance in meters
     const seed = getCurrentTimeBlock();
 
     const points = [];
     let attempts = 0;
-    const maxAttempts = n * 10; // Prevent infinite loops
+    const maxAttempts = n * 100; // Prevent infinite loops
 
     while (points.length < n && attempts < maxAttempts) {
         const angle = RNG() * 2 * Math.PI;
@@ -121,6 +121,7 @@ function generateRandomPoints(center, radius, n, minDistance = 200) { // minDist
 
         attempts++;
     }
+    console.log("Generated", points.length, "points with", attempts, "attempts");
     return points;
 }
 
@@ -144,8 +145,10 @@ function refreshZones(userPosition) {
             { lat: userPosition.coords.latitude, lng: userPosition.coords.longitude },
             MAX_ZONE_DISTANCE, N_ZONES);
 
-        // Generate new points
-        for (let i = 0; i < N_ZONES; i++) {
+        // Generate new points.
+        // Use newLocations.length, not N_ZONES, because we may not have 
+        // been able to generate N_ZONES points.
+        for (let i = 0; i < newLocations.length; i++) {
             const position = newLocations[i]
             const distance = map.distance(
                 [userPosition.coords.latitude, userPosition.coords.longitude],
@@ -285,6 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('checkInButton').addEventListener('click', () => {
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(checkIn, handleLocationError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
         }
     });
 });
@@ -323,6 +328,7 @@ function simulateMovement() {
 }
 
 function checkIn(position) {
+    console.log("Checking in");
     // Find if user is near any check-in points
     const userLatLng = [position.coords.latitude, position.coords.longitude];
 
@@ -332,10 +338,12 @@ function checkIn(position) {
         const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
 
         if (distance <= ZONE_SIZE) {
+            console.log("within range for a zone!")
             addUserPoints(point.points);
             alert(`Checked in! +${point.points} points`);
 
             point.setStatus('checkedIn');
         }
     }
+    console.log("done checking in");
 } 
