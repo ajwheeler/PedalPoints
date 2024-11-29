@@ -23,14 +23,33 @@ const ZoneStatus = {
     }
 };
 
-let gameState = {
-    points: 0,
+const userMarkerOptions = {
+    icon: L.divIcon({
+        html: '🚲',
+        className: 'bike-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    })
 };
 
 let map;
 let userMarker;
 let checkInZones = [];
 
+let gameState = {
+    points: 0,
+};
+function saveGameState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+}
+
+function loadGameState() {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (savedState) {
+        gameState = JSON.parse(savedState);
+        document.getElementById('points').textContent = gameState.points;
+    }
+}
 function splitmix32(a) {
     return function () {
         a |= 0;
@@ -56,35 +75,16 @@ function getCurrentTimeBlock() {
 
 RNG = splitmix32(getCurrentTimeBlock());
 
-const userMarkerOptions = {
-    icon: L.divIcon({
-        html: '🚲',
-        className: 'bike-marker',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
-    })
-};
-
 function addUserPoints(change) {
     gameState.points += change;
     document.getElementById('points').textContent = gameState.points;
     saveGameState();
 }
 
-function saveGameState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-}
 
-function loadGameState() {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-        gameState = JSON.parse(savedState);
-        document.getElementById('points').textContent = gameState.points;
-    }
-}
 
 // Generate N random points within a circle, keeping minimum distance between them
-function generateRandomPoints(center, radius, n, minDistance = 100) { // minDistance in meters
+function generateRandomZones(center, radius, n, minDistance = 100) { // minDistance in meters
     const seed = getCurrentTimeBlock();
 
     const points = [];
@@ -141,7 +141,7 @@ function refreshZones(userPosition) {
         checkInZones.forEach(point => point.remove());
         checkInZones = [];
 
-        const newLocations = generateRandomPoints(
+        const newLocations = generateRandomZones(
             { lat: userPosition.coords.latitude, lng: userPosition.coords.longitude },
             MAX_ZONE_DISTANCE, N_ZONES);
 
@@ -285,13 +285,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initMap();
 
     // Add check-in button listener
-    document.getElementById('checkInButton').addEventListener('click', () => {
-        if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(checkIn, handleLocationError);
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
-    });
+    const checkInButton = document.getElementById('checkInButton');
+    if (checkInButton) {
+        checkInButton.addEventListener('click', () => {
+            console.log('Check-in button clicked');
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(checkIn, handleLocationError);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+    } else {
+        console.error('Check-in button not found in DOM');
+    }
 });
 
 function simulateMovement() {
