@@ -38,6 +38,8 @@ let checkInZones = [];
 
 let gameState = {
     points: 0,
+    checkIns: 1,
+    multiplier: 1
 };
 function saveGameState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
@@ -48,6 +50,8 @@ function loadGameState() {
     if (savedState) {
         gameState = JSON.parse(savedState);
         document.getElementById('points').textContent = gameState.points;
+        document.getElementById('checkIns').textContent = gameState.checkIns;
+        document.getElementById('multiplier').textContent = gameState.multiplier + 'x';
     }
 }
 function splitmix32(a) {
@@ -77,7 +81,10 @@ RNG = splitmix32(getCurrentTimeBlock());
 
 function addUserPoints(change) {
     gameState.points += change;
+    gameState.checkIns += 1;
     document.getElementById('points').textContent = gameState.points;
+    document.getElementById('checkIns').textContent = gameState.checkIns;
+    document.getElementById('multiplier').textContent = gameState.multiplier + 'x';
     saveGameState();
 }
 
