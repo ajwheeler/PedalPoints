@@ -270,15 +270,24 @@ function updateUserLocation(position) {
         }
     }
 
-    // Update zone statuses
+    // Update zone statuses and check if any are nearby
     const userLatLng = [lat, lng];
+    let hasNearbyZones = false;
 
     checkInZones.forEach(zone => {
         const pointLatLng = zone.marker.getLatLng();
         const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
         const isNearby = distance <= ZONE_SIZE;
         zone.setStatus(isNearby ? ZoneStatus.NEARBY : ZoneStatus.NORMAL);
+
+        if (isNearby && !zone.checkedIn) {
+            hasNearbyZones = true;
+        }
     });
+
+    // Show/hide check-in button based on nearby zones
+    const checkInButton = document.getElementById('checkInButton');
+    checkInButton.style.display = hasNearbyZones ? 'block' : 'none';
 
     console.log("User location updated");
 }

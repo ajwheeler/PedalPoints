@@ -80,6 +80,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 1000;
+    display: none;
 }
 
 .check-in-button:hover {
