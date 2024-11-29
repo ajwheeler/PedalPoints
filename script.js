@@ -57,12 +57,12 @@ function getCurrentTimeBlock() {
 RNG = splitmix32(getCurrentTimeBlock());
 
 const userMarkerOptions = {
-    radius: 8,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8,
+    icon: L.divIcon({
+        html: '🚲',
+        className: 'bike-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    })
 };
 
 function addUserPoints(change) {
@@ -181,7 +181,6 @@ function createZone(position, points) {
     }).addTo(map);
 
     const marker = L.marker([position.lat, position.lng], { icon: icon })
-        .bindPopup(`Check-in point: ${points} points`)
         .addTo(map);
 
     return {
@@ -255,7 +254,7 @@ function updateUserLocation(position) {
     if (userMarker) {
         userMarker.setLatLng([lat, lng]);
     } else {
-        userMarker = L.circleMarker([lat, lng], userMarkerOptions).addTo(map);
+        userMarker = L.marker([lat, lng], userMarkerOptions).addTo(map);
 
         if (!map.getBounds().contains(userMarker.getLatLng())) {
             map.setView([lat, lng], 15);

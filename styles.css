@@ -95,3 +95,8 @@ body {
     display: inline-block;
     margin: 0 5px;
 }
+
+.bike-marker {
+    font-size: 34px;
+    text-align: center;
+}
