@@ -1,7 +1,22 @@
 const MILES_TO_METERS = 1609.34;
-const MAX_ZONE_DISTANCE = 3 * MILES_TO_METERS; // 3 miles in meters
-const N_ZONES = 1000;
+const MAX_ZONE_DISTANCE = 1 * MILES_TO_METERS; // 3 miles in meters
+const N_ZONES = 300;
 const ZONE_SIZE = 30; // how close counts as "at" a zone?
+
+const ZoneStatus = {
+    NORMAL: 'normal',
+    NEARBY: 'nearby',
+    COLORS: {
+        normal: {
+            background: '#ff69b4',
+            border: '#ff1493'
+        },
+        nearby: {
+            background: '#32CD32',
+            border: '#228B22'
+        }
+    }
+};
 
 let userPoints = 0;
 let map;
@@ -39,7 +54,7 @@ const userMarkerOptions = {
     color: "#000",
     weight: 1,
     opacity: 1,
-    fillOpacity: 0.8
+    fillOpacity: 0.8,
 };
 
 function addUserPoints(change) {
@@ -101,7 +116,7 @@ function refreshZones(userPosition) {
     // Only refresh if we're in a new time block
     if (checkInZones.timeBlock !== currentBlock) {
         console.log("Refreshing zones for new time block");
-        checkInZones.forEach(point => point.marker.remove());
+        checkInZones.forEach(point => point.remove());
         checkInZones = [];
 
         const newLocations = generateRandomPoints(
@@ -117,32 +132,67 @@ function refreshZones(userPosition) {
             );
             const points = choosePointValues(distance);
 
-            // Create a custom icon with points displayed
-            const icon = L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background: #ff69b4; padding: 3px; border-radius: 10px; border: 2px solid #ff1493; color: white; font-weight: bold; text-align: center; min-width: 20px;">${points}</div>`,
-                iconSize: [30, 25],
-                iconAnchor: [15, 12]
-            });
-
-            // Add a circle to show the check-in zone
-            const circle = L.circle([position.lat, position.lng], {
-                radius: ZONE_SIZE,
-                color: '#ff1493',
-                fillColor: '#ff69b4',
-                fillOpacity: 0.2,
-                weight: 1
-            }).addTo(map);
-
-            const marker = L.marker([position.lat, position.lng], { icon: icon })
-                .bindPopup(`Check-in point: ${points} points`)
-                .addTo(map);
-            checkInZones.push({ marker, points });
+            const zone = createZone(position, points);
+            checkInZones.push(zone);
         }
 
         // Store the current time block
         checkInZones.timeBlock = currentBlock;
     }
+}
+
+function createZone(position, points) {
+    // Create a custom icon with points displayed
+    const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="background: ${ZoneStatus.COLORS.normal.background}; padding: 3px; border-radius: 10px; border: 2px solid ${ZoneStatus.COLORS.normal.border}; color: white; font-weight: bold; text-align: center; min-width: 20px;">${points}</div>`,
+        iconSize: [30, 25],
+        iconAnchor: [15, 12]
+    });
+
+    // Add a circle to show the check-in zone
+    const circle = L.circle([position.lat, position.lng], {
+        radius: ZONE_SIZE,
+        color: ZoneStatus.COLORS.normal.border,
+        fillColor: ZoneStatus.COLORS.normal.background,
+        fillOpacity: 0.2,
+        weight: 1
+    }).addTo(map);
+
+    const marker = L.marker([position.lat, position.lng], { icon: icon })
+        .bindPopup(`Check-in point: ${points} points`)
+        .addTo(map);
+
+    return {
+        marker,
+        circle,
+        points,
+        status: ZoneStatus.NORMAL,
+        setStatus(newStatus) {
+            if (!(newStatus in ZoneStatus.COLORS)) return;
+
+            this.status = newStatus;
+            const colors = ZoneStatus.COLORS[newStatus];
+
+            // Update marker colors
+            const iconElement = this.marker.getElement();
+            if (iconElement) {
+                const div = iconElement.querySelector('div');
+                div.style.background = colors.background;
+                div.style.borderColor = colors.border;
+            }
+
+            // Update circle colors
+            this.circle.setStyle({
+                color: colors.border,
+                fillColor: colors.background
+            });
+        },
+        remove() {
+            this.marker.remove();
+            this.circle.remove();
+        }
+    };
 }
 
 function initMap() {
@@ -189,8 +239,15 @@ function updateUserLocation(position) {
             map.setView([lat, lng], 15);
         }
     }
-    // Check if user is near any check-in points
-    //checkIn(position);
+
+    // Update zone statuses
+    const userLatLng = [lat, lng];
+    checkInZones.forEach(zone => {
+        const pointLatLng = zone.marker.getLatLng();
+        const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
+
+        zone.setStatus(distance <= ZONE_SIZE ? ZoneStatus.NEARBY : ZoneStatus.NORMAL);
+    });
 
     console.log("User location updated");
 }
@@ -202,7 +259,38 @@ function handleLocationError(error) {
 // Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', initMap);
 
+function simulateMovement() {
+    if (checkInZones.length === 0) return;
 
+    // Pick a random zone
+    const randomIndex = Math.floor(Math.random() * checkInZones.length);
+    const targetZone = checkInZones[randomIndex];
+    const targetPos = targetZone.marker.getLatLng();
+
+    // Add small random offset (1-3 meters in random direction)
+    const offsetAngle = Math.random() * 2 * Math.PI;
+    const offsetDistance = 1 + Math.random() * 2; // 1-3 meters
+    const offsetLat = (offsetDistance * Math.sin(offsetAngle)) / 111111;
+    const offsetLng = (offsetDistance * Math.cos(offsetAngle)) / (111111 * Math.cos(targetPos.lat));
+
+    // Create fake position object matching geolocation API format
+    const fakePosition = {
+        coords: {
+            latitude: targetPos.lat + offsetLat,
+            longitude: targetPos.lng + offsetLng,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null
+        },
+        timestamp: Date.now()
+    };
+
+    // Update user location and trigger check-in
+    updateUserLocation(fakePosition);
+    //checkIn(fakePosition);
+}
 
 function checkIn(position) {
     // Find if user is near any check-in points
@@ -218,7 +306,7 @@ function checkIn(position) {
             alert(`Checked in! +${point.points} points`);
 
             // Remove this check-in point
-            point.marker.remove();
+            point.remove();
             checkInZones.splice(i, 1);
 
             // Generate a new point to replace it
