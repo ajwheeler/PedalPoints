@@ -315,6 +315,12 @@ function checkIn(position) {
     console.log("done checking in");
 }
 
+function centerMapOnUser() {
+    if (userMarker) {
+        map.setView(userMarker.getLatLng(), 15);
+    }
+}
+
 // Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
@@ -331,6 +337,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } else {
         console.error('Check-in button not found in DOM');
+    }
+
+    // Add center map button listener
+    const centerMapButton = document.getElementById('centerMapButton');
+    if (centerMapButton) {
+        centerMapButton.addEventListener('click', centerMapOnUser);
+    } else {
+        console.error('Center map button not found in DOM');
     }
 });
 
