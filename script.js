@@ -49,7 +49,13 @@ function saveGameState() {
 function loadGameState() {
     const savedState = localStorage.getItem(STORAGE_KEY);
     if (savedState) {
-        gameState = JSON.parse(savedState);
+        const loaded = JSON.parse(savedState);
+        // Ensure all properties exist with defaults
+        gameState = {
+            points: loaded.points || 0,
+            checkIns: loaded.checkIns || 0,
+            multiplier: loaded.multiplier || 1
+        };
         document.getElementById('points').textContent = gameState.points;
         document.getElementById('checkIns').textContent = gameState.checkIns;
         document.getElementById('multiplier').textContent = gameState.multiplier + 'x';

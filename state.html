@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <form id="settingsForm">
+        <div class="form-group">
+            <label for="points">Points:</label>
+            <input type="number" id="points" name="points">
+        </div>
+        <div class="form-group">
+            <label for="checkIns">Check-ins:</label>
+            <input type="number" id="checkIns" name="checkIns">
+        </div>
+        <div class="form-group">
+            <label for="multiplier">Multiplier:</label>
+            <input type="number" id="multiplier" name="multiplier">
+        </div>
+        <button type="submit">Save Changes</button>
+    </form>
+    <script>
+        const STORAGE_KEY = 'PedalPointsGameState';
+
+        // Load current values
+        function loadCurrentValues() {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                document.getElementById('points').value = gameState.points;
+                document.getElementById('checkIns').value = gameState.checkIns;
+                document.getElementById('multiplier').value = gameState.multiplier;
+            }
+        }
+
+        // Save new values
+        document.getElementById('settingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const gameState = {
+                points: parseInt(document.getElementById('points').value) || 0,
+                checkIns: parseInt(document.getElementById('checkIns').value) || 0,
+                multiplier: parseInt(document.getElementById('multiplier').value) || 1
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+            alert('Settings saved!');
+        });
+
+        // Load values when page loads
+        loadCurrentValues();
+    </script>
+</body>
+
+</html>
