@@ -34,11 +34,12 @@ const userMarkerOptions = {
 
 let map;
 let userMarker;
+let cachedUserPosition = null;
 let checkInZones = [];
 
 let gameState = {
     points: 0,
-    checkIns: 1,
+    checkIns: 0,
     multiplier: 1
 };
 function saveGameState() {
@@ -54,6 +55,7 @@ function loadGameState() {
         document.getElementById('multiplier').textContent = gameState.multiplier + 'x';
     }
 }
+
 function splitmix32(a) {
     return function () {
         a |= 0;
@@ -77,7 +79,8 @@ function getCurrentTimeBlock() {
     return now.getTime();
 }
 
-RNG = splitmix32(getCurrentTimeBlock());
+let RNG = splitmix32(getCurrentTimeBlock());
+
 
 function addUserPoints(change) {
     gameState.points += change;
@@ -90,8 +93,6 @@ function addUserPoints(change) {
 
 // Generate N random points within a circle, keeping minimum distance between them
 function generateRandomZones(center, radius, n, minDistance = 100) { // minDistance in meters
-    const seed = getCurrentTimeBlock();
-
     const points = [];
     let attempts = 0;
     const maxAttempts = n * 100; // Prevent infinite loops
@@ -246,7 +247,7 @@ function initMap() {
                     refreshZones(position);
                 }
             },
-            handleLocationError,
+            (error) => console.error("Error getting location:", error),
             {
                 enableHighAccuracy: true,
                 maximumAge: 30000,
@@ -259,31 +260,25 @@ function initMap() {
     console.log("Map initialized");
 }
 
-let cachedUserPosition = null;
-
 function updateUserLocation(position) {
-    const lat = position.coords.latitude;
-    const lng = position.coords.longitude;
-
+    const pos = [position.coords.latitude, position.coords.longitude];
     cachedUserPosition = position;
 
     if (userMarker) {
-        userMarker.setLatLng([lat, lng]);
-    } else {
-        userMarker = L.marker([lat, lng], userMarkerOptions).addTo(map);
-
+        userMarker.setLatLng(pos);
+    } else { // first time we've seen the user, add the marker
+        userMarker = L.marker(pos, userMarkerOptions).addTo(map);
         if (!map.getBounds().contains(userMarker.getLatLng())) {
-            map.setView([lat, lng], 15);
+            map.setView(pos, 15);
         }
     }
 
     // Update zone statuses and check if any are nearby
-    const userLatLng = [lat, lng];
     let hasNearbyZones = false;
 
     checkInZones.forEach(zone => {
         const pointLatLng = zone.marker.getLatLng();
-        const distance = map.distance(userLatLng, [pointLatLng.lat, pointLatLng.lng]);
+        const distance = map.distance(pos, [pointLatLng.lat, pointLatLng.lng]);
         const isNearby = distance <= ZONE_SIZE;
         zone.setStatus(isNearby ? ZoneStatus.NEARBY : ZoneStatus.NORMAL);
 
@@ -297,62 +292,6 @@ function updateUserLocation(position) {
     checkInButton.style.display = hasNearbyZones ? 'block' : 'none';
 
     console.log("User location updated");
-}
-
-function handleLocationError(error) {
-    console.error("Error getting location:", error);
-}
-
-// Initialize everything when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-
-    const checkInButton = document.getElementById('checkInButton');
-    if (checkInButton) {
-        checkInButton.addEventListener('click', () => {
-            console.log('Check-in button clicked');
-            if (cachedUserPosition) {
-                checkIn(cachedUserPosition);
-            } else {
-                alert("Please wait for your location to be determined.");
-            }
-        });
-    } else {
-        console.error('Check-in button not found in DOM');
-    }
-});
-
-function simulateMovement() {
-    if (checkInZones.length === 0) return;
-
-    // Pick a random zone
-    const randomIndex = Math.floor(Math.random() * checkInZones.length);
-    const targetZone = checkInZones[randomIndex];
-    const targetPos = targetZone.marker.getLatLng();
-
-    // Add small random offset (1-3 meters in random direction)
-    const offsetAngle = Math.random() * 2 * Math.PI;
-    const offsetDistance = 1 + Math.random() * 2; // 1-3 meters
-    const offsetLat = (offsetDistance * Math.sin(offsetAngle)) / 111111;
-    const offsetLng = (offsetDistance * Math.cos(offsetAngle)) / (111111 * Math.cos(targetPos.lat));
-
-    // Create fake position object matching geolocation API format
-    const fakePosition = {
-        coords: {
-            latitude: targetPos.lat + offsetLat,
-            longitude: targetPos.lng + offsetLng,
-            accuracy: 10,
-            altitude: null,
-            altitudeAccuracy: null,
-            heading: null,
-            speed: null
-        },
-        timestamp: Date.now()
-    };
-
-    // Update user location and trigger check-in
-    updateUserLocation(fakePosition);
-    //checkIn(fakePosition);
 }
 
 function checkIn(position) {
@@ -374,4 +313,53 @@ function checkIn(position) {
         }
     }
     console.log("done checking in");
-} 
+}
+
+// Initialize everything when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+
+    const checkInButton = document.getElementById('checkInButton');
+    if (checkInButton) {
+        checkInButton.addEventListener('click', () => {
+            console.log('Check-in button clicked');
+            if (cachedUserPosition) {
+                checkIn(cachedUserPosition);
+            } else {
+                alert("Please wait for your location to be determined.");
+            }
+        });
+    } else {
+        console.error('Check-in button not found in DOM');
+    }
+});
+
+// ----------------------------------------------------------------
+// testing stuff
+// ----------------------------------------------------------------
+
+function simulateMovement() {
+    if (checkInZones.length === 0) return;
+
+    // Pick a random zone
+    const randomIndex = Math.floor(Math.random() * checkInZones.length);
+    const targetZone = checkInZones[randomIndex];
+    const targetPos = targetZone.marker.getLatLng();
+
+    // Create fake position object matching geolocation API format
+    const fakePosition = {
+        coords: {
+            latitude: targetPos.lat,
+            longitude: targetPos.lng,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null
+        },
+        timestamp: Date.now()
+    };
+
+    // Update user location and trigger check-in
+    updateUserLocation(fakePosition);
+}
