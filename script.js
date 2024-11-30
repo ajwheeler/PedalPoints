@@ -1,7 +1,7 @@
 const MILES_TO_METERS = 1609.34;
 const MAX_ZONE_DISTANCE = 1 * MILES_TO_METERS; // 3 miles in meters
 const N_ZONES = 200;
-const ZONE_SIZE = 30; // how close counts as "at" a zone?
+const ZONE_SIZE = 40; // how close counts as "at" a zone?
 const STORAGE_KEY = 'PedalPointsGameState';
 
 const ZoneStatus = {
