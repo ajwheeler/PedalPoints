@@ -92,29 +92,23 @@ function addUserPoints(change) {
 }
 
 // Generate N random points within a circle, keeping minimum distance between them
-function generateRandomZones(center, radius, n, minDistance = 100) { // minDistance in meters
+function generateRandomZones(center, radius, n, minDistance = 100) {
     const points = [];
     let attempts = 0;
-    const maxAttempts = n * 100; // Prevent infinite loops
+    const maxAttempts = n * 100;
 
     while (points.length < n && attempts < maxAttempts) {
         const angle = RNG() * 2 * Math.PI;
         const distance = Math.sqrt(RNG()) * radius;
 
-        const dx = distance * Math.cos(angle);
-        const dy = distance * Math.sin(angle);
-
-        // Convert to latitude/longitude
-        const newLat = center.lat + (dy / 111111);
-        const newLng = center.lng + (dx / (111111 * Math.cos(center.lat)));
+        // Convert to latitude/longitude using proper spherical math
+        const lat = center.lat + (distance * Math.cos(angle) / 111111);
+        const lng = center.lng + (distance * Math.sin(angle) / (111111 * Math.cos(center.lat * Math.PI / 180)));
 
         // Check distance from all existing points
         let tooClose = false;
         for (const point of points) {
-            const d = Math.sqrt(
-                Math.pow((newLat - point.lat) * 111111, 2) +
-                Math.pow((newLng - point.lng) * 111111 * Math.cos(center.lat), 2)
-            );
+            const d = map.distance([lat, lng], [point.lat, point.lng]);
             if (d < minDistance) {
                 tooClose = true;
                 break;
@@ -122,7 +116,7 @@ function generateRandomZones(center, radius, n, minDistance = 100) { // minDista
         }
 
         if (!tooClose) {
-            points.push({ lat: newLat, lng: newLng });
+            points.push({ lat, lng });
         }
 
         attempts++;
